@@ -1,0 +1,1 @@
+less than 50 lines js code to implement web snake 

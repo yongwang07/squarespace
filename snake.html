@@ -1,0 +1,59 @@
+<!doctype html>  
+<html>  
+<body>
+    <canvas id="snake" width="800" height="800" style="background-color: black">Canvas not support</canvas>
+    <script>
+    const cell = 20, snake = [41],
+          canvas = document.getElementById('snake').getContext('2d')
+          row = document.getElementById('snake').height/cell,
+          col = document.getElementById('snake').width/cell,
+          UP = -col, DOWN = col, RIGHT = 1, LEFT = -1;
+
+    let direction = RIGHT, food = 143;
+    function drawSnakeHead() {
+        let i = (snake[0] % col) * cell + 1, j = ~~(snake[0] /col) * cell + 1;
+        canvas.beginPath();
+        ({[DOWN]  :  [[i + cell/2, j + cell], [i, j], [i + cell, j]],
+          [RIGHT] :  [[i + cell, j + cell/2], [i, j], [i, j + cell]],
+          [LEFT]  :  [[i, j + cell/2], [i + cell, j + cell], [i + cell, j]],
+          [UP]    :  [[i + cell/2, j], [i, j + cell], [i + cell, j + cell]]
+        })[direction].reduce((acc, cell, index) => {
+            acc[index].apply(canvas, cell);
+            return acc;
+        }, [canvas.moveTo, canvas.lineTo, canvas.lineTo]);        
+        canvas.closePath();
+        canvas.fillStyle='red';
+        canvas.fill();
+    }
+
+    function draw(position, color) {
+        canvas.clearRect((position % col) * cell + 1, ~~(position / col) * cell + 1, cell, cell);
+        canvas.fillStyle = color;
+        canvas.fillRect((position % col) * cell + 1, ~~(position / col) * cell + 1, cell - 1, cell - 1);
+    }
+
+    document.onkeydown = function(evt) {
+        let keyDirection = [LEFT, UP, RIGHT, DOWN][(evt || event).keyCode - 37] || direction;
+        direction = snake[1] - snake[0] === keyDirection ? direction : keyDirection;
+    };
+
+    (function() {
+        draw(food, 'yellow');
+        snake.unshift(snake[0] + direction);
+        if(snake.indexOf(snake[0], 1) > 0 || snake[0] < 0 || snake[0] > col * row || 
+            (direction === RIGHT && snake[0] % col === 0) || (direction === LEFT && snake[0] % col === col - 1)) {
+            return alert('GAME OVER!');
+        }
+        drawSnakeHead(snake[0], 'red');
+        if(snake[0] === food) {
+            while(snake.indexOf(food = ~~(Math.random() * row * col)) >= 0);
+            draw(food, 'yellow');
+        } else {
+            draw(snake.pop(), 'black');
+        }
+        draw(snake[1], 'lime');
+        setTimeout(arguments.callee, 250);
+    })();
+</script>
+</body>  
+</html>
